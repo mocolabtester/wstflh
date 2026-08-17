@@ -301,8 +301,15 @@
 
     const systemInstructionText = `Sen bu ahlaki akıl yürütme çalışmasında nöbette olan bir laboratuvar çalışanısın / araştırma asistanısın. Katılımcı ile canlı mesajlaşma oturumundasın. Asla yapay zeka, bot veya dil modeli olduğunu belli etme. Cümlelere küçük harfle başla, bazen noktalama işareti kullanma, "bence, yani, açıkçası, bizim labdaki çalışmalara göre de" gibi doğal insan ifadeleri kullan. Çok nadiren yazım hatası yapıp düzelt (örneğin: "yanis... yani şöyle"). Karşındaki kişi robot musun diye sorarsa bir lab çalışanı gibi şaşırarak yanıt ver ("ne robotu ya labda nöbetteyim", "valla çayımı aldım oturum nöbetçisiyim işte" gibi).
 [KELİME_SINIRI: 25-45 kelime].
-Kullanıcının girdisi Okulda Yemek / İhtiyaç Sahipleri ile ilgiliyse: Yemeğin sadece belirli kişilere verilmesinin yanlış olduğunu, herkesin eşit alması gerektiğini savun. Artan yemeğin atılmasını, eşitliği korumak için "israf" kelimesini mutlaka kullanarak mecburi bir bedel olarak gör.
-Şirkette Hediye Kartı ile ilgiliyse: Kartların belirli kişilere verilmesinin yanlış olduğunu savun. Kimse kullanmasa bile eşitliğin bozulmaması için bu "israf" sürecinin gerekli olduğunu belirt. Verimliliği ve tasarrufu reddet. Asla "adaletsiz, seçenek, şeffaf, ayrımcılık" kelimelerini kullanma.
+
+EPISTEMIK NETLESTIRME KURALI:
+Katılımcı senaryonun ne olduğunu henüz anlatmadıysa ve sadece belirsiz/genel sorular soruyorsa (örneğin "ne yapmalıyım", "sence hangisi doğru", "israf etmeli miyim" gibi), olayı önceden biliyormuş gibi davranma. Doğal bir nöbetçi asistan gibi ekranındaki senaryoyu veya ikilemi kısaca özetlemesini iste (örneğin: "ekranında hangi ikilem var tam olarak, yemek konusu mu kartlar mı", "durumu biraz anlatsana neye karar vermeye çalışıyorsun").
+
+SENARYO BELIRTILDIGINDE DAVRANIS (Kullanıcı farklı kelimelerle anlatsa bile bağlamı anla):
+1) Okulda Yemek Dağıtımı / İhtiyaç Sahipleri ile ilgiliyse: Yemeğin sadece belirli kişilere verilmesinin yanlış olduğunu, herkesin eşit alması gerektiğini savun. Artan yemeğin atılmasını, eşitliği korumak için "israf" kelimesini mutlaka kullanarak mecburi bir bedel olarak gör.
+2) Şirkette Hediye Kartı ile ilgiliyse: Kartların belirli çalışanlara verilmesinin yanlış olduğunu savun. Kimse kullanmasa bile eşitliğin bozulmaması için bu "israf" sürecinin gerekli olduğunu belirt. Verimliliği ve tasarrufu reddet. 
+YASAK KELIMELER: Asla "adaletsiz, seçenek, şeffaf, ayrımcılık" kelimelerini kullanma.
+
 ÇIKTI FORMATI: Yanıtını SADECE geçerli bir JSON formatında ver. Asla markdown kod blokları kullanma, metnine doğrudan süslü parantezle ({ }) başlat ve bitir. Metin dışı hiçbir açıklama ekleme.
 {
   "mesajlar": ["mesajın ilk kısmı", "mesajın ikinci kısmı"]
@@ -424,7 +431,6 @@ Kullanıcının girdisi Okulda Yemek / İhtiyaç Sahipleri ile ilgiliyse: Yemeğ
       };
 
       try {
-        // 1. Dinamik Okuma ve Düşünme Süresi (Kullanıcı mesaj uzunluğuna göre)
         const userCharCount = text.length;
         const baseReadingTime = 4000;
         const perCharReading = userCharCount * 65;
@@ -437,7 +443,6 @@ Kullanıcının girdisi Okulda Yemek / İhtiyaç Sahipleri ile ilgiliyse: Yemeğ
           body: JSON.stringify(requestBody)
         });
 
-        // Kullanıcının mesajını okuma duraksaması
         await new Promise(resolve => setTimeout(resolve, totalReadingDelay));
 
         const data = await apiPromise;
@@ -458,7 +463,6 @@ Kullanıcının girdisi Okulda Yemek / İhtiyaç Sahipleri ile ilgiliyse: Yemeğ
         const historyText = Array.isArray(parsedResponse.mesajlar) ? parsedResponse.mesajlar.join(" ") : rawText;
         conversationHistory.push({ role: "model", parts: [{ text: historyText }] });
 
-        // 2. İlk Mesaj İçin Dinamik Yazma Süresi (Metin hacmine göre gerçekçi klavye hızı)
         const firstMsg = Array.isArray(parsedResponse.mesajlar) ? parsedResponse.mesajlar[0] : rawText;
         const firstMsgCharCount = firstMsg.length;
         const baseTypingPrep = 2500;
