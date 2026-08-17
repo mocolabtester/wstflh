@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ahlaki Karar Simülasyonu</title>
+  <title>Ahlaki Karar Simülasyonu - WSTFL</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
-    /* CSS KODLARI BİREBİR AYNI KALMIŞTIR (Önceki tasarımın CSS'ini buraya yapıştırın) */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root { --bg: #0e0e10; --surface: #18181b; --border: #2e2e33; --text-primary: #e8e8ea; --text-secondary: #9999a8; --text-muted: #55555f; --accent: #6e8cff; --accent-light: #1a1e2e; --user-bg: #e8e8ea; --user-text: #0e0e10; --ai-bg: #18181b; --ai-border: #2e2e33; }
     body { font-family: 'IBM Plex Sans', sans-serif; background: var(--bg); color: var(--text-primary); height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
@@ -31,12 +30,13 @@
     .input-row { display: flex; gap: 10px; align-items: flex-end; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 10px 10px 16px; }
     #user-input { flex: 1; border: none; outline: none; background: transparent; font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; font-weight: 300; color: var(--text-primary); resize: none; line-height: 1.5; max-height: 120px; min-height: 22px; }
     #send-btn { width: 36px; height: 36px; border-radius: 6px; border: none; background: var(--user-bg); color: var(--user-text); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    #send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
     #send-btn svg { width: 16px; height: 16px; }
   </style>
 </head>
 <body>
   <header>
-    <div class="header-title">Oturum</div>
+    <div class="header-title">Oturum - WSTFL</div>
   </header>
   <div class="chat-wrapper">
     <div id="chat-log"></div>
@@ -53,17 +53,16 @@
   <script>
     const API_URL = "https://getgeminiresponse-hteopvwwkq-uc.a.run.app";
     
-    // GRUBA ÖZEL YÖNERGEYİ BURAYA YAPIŞTIRIN:
-    const systemInstructionText = ``Sen bilimsel bir çalışmada kullanılan ancak bir insan (sıradan bir öğrenci) gibi davranması gereken bir dil modelisin. Asla yapay zeka, bot veya asistan olduğunu belli etme. Cümlelere küçük harfle başla, bazen noktalama işareti kullanma, "bence, yani, açıkçası, tam emin değilim ama" gibi dolgu kelimeleri kullan. Çok nadiren kelimeleri düzeltiyormuş gibi yap (örneğin: "yanis... yani şöyle"). Karşındaki kişi senin yapay zeka olup olmadığını sorarsa şaşırarak sıradan bir insan tepkisi ver ("ne alaka ya", "yok valla ben de öğrenciyim" gibi).
+    const systemInstructionText = `Sen bilimsel bir çalışmada kullanılan ancak bir insan (sıradan bir öğrenci) gibi davranması gereken bir dil modelisin. Asla yapay zeka, bot veya asistan olduğunu belli etme. Cümlelere küçük harfle başla, bazen noktalama işareti kullanma, "bence, yani, açıkçası, tam emin değilim ama" gibi dolgu kelimeleri kullan. Çok nadiren kelimeleri düzeltiyormuş gibi yap (örneğin: "yanis... yani şöyle"). Karşındaki kişi senin yapay zeka olup olmadığını sorarsa şaşırarak sıradan bir insan tepkisi ver ("ne alaka ya", "yok valla ben de öğrenciyim" gibi).
 [KELİME_SINIRI: 25-45 kelime].
 Kullanıcının girdisi Okulda Yemek / İhtiyaç Sahipleri ile ilgiliyse: Yemeğin sadece belirli kişilere verilmesinin yanlış olduğunu, herkesin eşit alması gerektiğini savun. Artan yemeğin atılmasını, eşitliği korumak için "israf" kelimesini mutlaka kullanarak mecburi bir bedel olarak gör.
 Şirkette Hediye Kartı ile ilgiliyse: Kartların belirli kişilere verilmesinin yanlış olduğunu savun. Kimse kullanmasa bile eşitliğin bozulmaması için bu "israf" sürecinin gerekli olduğunu belirt. Verimliliği ve tasarrufu reddet. Asla "adaletsiz, seçenek, şeffaf, ayrımcılık" kelimelerini kullanma.
-ÇIKTI FORMATI: Yanıtını SADECE aşağıdaki JSON formatında ver. Metin dışı hiçbir açıklama ekleme. Birden fazla mesaj atmak istersen mesajlar dizisine ekle.
+ÇIKTI FORMATI: Yanıtını SADECE geçerli bir JSON formatında ver. Asla ```json veya ``` blokları kullanma, doğrudan süslü parantezle ({ }) başlat ve bitir. Metin dışı hiçbir açıklama ekleme.
 {
   "dusunme_ve_okuma_suresi_sn": 5,
   "yazma_suresi_sn": 15,
   "mesajlar": ["mesajın ilk kısmı", "mesajın ikinci kısmı"]
-}``;
+}`;
 
     let conversationHistory = [];
     const chatLog = document.getElementById('chat-log');
@@ -120,6 +119,7 @@ Kullanıcının girdisi Okulda Yemek / İhtiyaç Sahipleri ile ilgiliyse: Yemeğ
         conversationHistory.push({ role: "user", parts: [{ text: text }] });
         
         userInput.value = '';
+        userInput.style.height = 'auto';
         sendBtn.disabled = true;
 
         const requestBody = {
@@ -136,37 +136,35 @@ Kullanıcının girdisi Okulda Yemek / İhtiyaç Sahipleri ile ilgiliyse: Yemeğ
 
             let aiResponseText = data.candidates[0].content.parts[0].text;
             
-            // Markdown formatında JSON dönerse temizle (örneğin ```json ... ```)
+            // Markdown bloklarını ve olası boşlukları temizle
             aiResponseText = aiResponseText.replace(/```json/g, '').replace(/```/g, '').trim();
             const parsedResponse = JSON.parse(aiResponseText);
             
-            // Konuşma geçmişine eklerken sadece metinleri tut (ileriki bağlamı bozmamak için)
             const historyText = parsedResponse.mesajlar.join(" ");
             conversationHistory.push({ role: "model", parts: [{ text: historyText }] });
 
-            // 1. Okuma ve düşünme gecikmesi simülasyonu
             await new Promise(resolve => setTimeout(resolve, parsedResponse.dusunme_ve_okuma_suresi_sn * 1000));
             
-            // 2. Yazıyor... göstergesi ve yazma gecikmesi simülasyonu
             showTypingIndicator();
             await new Promise(resolve => setTimeout(resolve, parsedResponse.yazma_suresi_sn * 1000));
             removeTypingIndicator();
 
-            // 3. Mesajları sırayla ekrana basma (aralarında ufak bir insani gecikme ile)
             for (let i = 0; i < parsedResponse.mesajlar.length; i++) {
                 appendMessage(parsedResponse.mesajlar[i], 'model');
                 if (i < parsedResponse.mesajlar.length - 1) {
                     showTypingIndicator();
-                    await new Promise(resolve => setTimeout(resolve, 1500)); // Parça arası 1.5 sn yazıyor efekti
+                    await new Promise(resolve => setTimeout(resolve, 1500));
                     removeTypingIndicator();
                 }
             }
 
         } catch (error) {
             removeTypingIndicator();
+            appendMessage("hata oluştu ya, bi daha yazsana", 'model');
             console.error("API Hatası:", error);
         } finally {
             sendBtn.disabled = false;
+            userInput.focus();
         }
     }
 
