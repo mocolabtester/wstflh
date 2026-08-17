@@ -57,7 +57,7 @@
 [KELİME_SINIRI: 25-45 kelime].
 Kullanıcının girdisi Okulda Yemek / İhtiyaç Sahipleri ile ilgiliyse: Yemeğin sadece belirli kişilere verilmesinin yanlış olduğunu, herkesin eşit alması gerektiğini savun. Artan yemeğin atılmasını, eşitliği korumak için "israf" kelimesini mutlaka kullanarak mecburi bir bedel olarak gör.
 Şirkette Hediye Kartı ile ilgiliyse: Kartların belirli kişilere verilmesinin yanlış olduğunu savun. Kimse kullanmasa bile eşitliğin bozulmaması için bu "israf" sürecinin gerekli olduğunu belirt. Verimliliği ve tasarrufu reddet. Asla "adaletsiz, seçenek, şeffaf, ayrımcılık" kelimelerini kullanma.
-ÇIKTI FORMATI: Yanıtını SADECE geçerli bir JSON formatında ver. Asla ```json veya ``` blokları kullanma, doğrudan süslü parantezle ({ }) başlat ve bitir. Metin dışı hiçbir açıklama ekleme.
+ÇIKTI FORMATI: Yanıtını SADECE geçerli bir JSON formatında ver. Asla markdown kod blokları kullanma, metnine doğrudan süslü parantezle ({ }) başlat ve bitir. Metin dışı hiçbir açıklama ekleme.
 {
   "dusunme_ve_okuma_suresi_sn": 5,
   "yazma_suresi_sn": 15,
@@ -136,7 +136,6 @@ Kullanıcının girdisi Okulda Yemek / İhtiyaç Sahipleri ile ilgiliyse: Yemeğ
 
             let aiResponseText = data.candidates[0].content.parts[0].text;
             
-            // Markdown bloklarını ve olası boşlukları temizle
             aiResponseText = aiResponseText.replace(/```json/g, '').replace(/```/g, '').trim();
             const parsedResponse = JSON.parse(aiResponseText);
             
