@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,43 +8,282 @@
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root { --bg: #0e0e10; --surface: #18181b; --border: #2e2e33; --text-primary: #e8e8ea; --text-secondary: #9999a8; --text-muted: #55555f; --accent: #6e8cff; --accent-light: #1a1e2e; --user-bg: #e8e8ea; --user-text: #0e0e10; --ai-bg: #18181b; --ai-border: #2e2e33; }
-    body { font-family: 'IBM Plex Sans', sans-serif; background: var(--bg); color: var(--text-primary); height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
-    header { padding: 14px 24px; border-bottom: 1px solid var(--border); background: var(--surface); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
-    .header-title { font-size: 14px; font-weight: 500; color: var(--text-primary); }
-    .chat-wrapper { flex: 1; overflow: hidden; display: flex; flex-direction: column; max-width: 760px; width: 100%; margin: 0 auto; padding: 0 16px; }
-    #chat-log { flex: 1; overflow-y: auto; padding: 28px 0 16px; display: flex; flex-direction: column; gap: 20px; scroll-behavior: smooth; }
-    #chat-log::-webkit-scrollbar { width: 4px; } #chat-log::-webkit-scrollbar-track { background: transparent; } #chat-log::-webkit-scrollbar-thumb { background: #2e2e33; border-radius: 2px; }
-    .message { display: flex; flex-direction: column; gap: 6px; animation: fadeSlide 0.25s ease; }
-    @keyframes fadeSlide { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-    .message-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
+    :root {
+      --bg: #0e0e10;
+      --surface: #18181b;
+      --border: #2e2e33;
+      --text-primary: #e8e8ea;
+      --text-secondary: #9999a8;
+      --text-muted: #55555f;
+      --accent: #6e8cff;
+      --accent-light: #1a1e2e;
+      --user-bg: #e8e8ea;
+      --user-text: #0e0e10;
+      --ai-bg: #18181b;
+      --ai-border: #2e2e33;
+      --system-status: #34d399;
+    }
+
+    body {
+      font-family: 'IBM Plex Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    header {
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .header-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #eab308;
+      display: inline-block;
+    }
+
+    .status-indicator.connected {
+      background: var(--system-status);
+    }
+
+    .chat-wrapper {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      max-width: 760px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    #chat-log {
+      flex: 1;
+      overflow-y: auto;
+      padding: 28px 0 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      scroll-behavior: smooth;
+    }
+
+    #chat-log::-webkit-scrollbar { width: 4px; }
+    #chat-log::-webkit-scrollbar-track { background: transparent; }
+    #chat-log::-webkit-scrollbar-thumb { background: #2e2e33; border-radius: 2px; }
+
+    .system-notification {
+      align-self: center;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px dashed var(--border);
+      color: var(--text-secondary);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: fadeSlide 0.3s ease;
+    }
+
+    .connecting-card {
+      align-self: center;
+      background: var(--accent-light);
+      border: 1px solid #2a3050;
+      color: #9aabff;
+      font-size: 13px;
+      padding: 16px 20px;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-width: 90%;
+      text-align: center;
+      animation: fadeSlide 0.3s ease;
+    }
+
+    .connecting-card .timer-text {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      color: var(--accent);
+    }
+
+    .message {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      animation: fadeSlide 0.25s ease;
+    }
+
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .message-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
     .message.user { align-items: flex-end; }
-    .bubble { max-width: 82%; padding: 13px 17px; line-height: 1.65; font-size: 14.5px; font-weight: 300; }
-    .message.user .bubble { background: var(--user-bg); color: var(--user-text); border-radius: 12px 12px 2px 12px; }
-    .message.ai .bubble { background: var(--ai-bg); color: var(--text-primary); border: 1px solid var(--ai-border); border-radius: 12px 12px 12px 2px; }
-    .typing-bubble { background: var(--ai-bg); border: 1px solid var(--ai-border); border-radius: 12px 12px 12px 2px; padding: 14px 18px; display: flex; gap: 5px; align-items: center; width: fit-content; animation: fadeSlide 0.25s ease; }
-    .dot { width: 6px; height: 6px; background: var(--text-muted); border-radius: 50%; animation: bounce 1.2s infinite ease-in-out; }
-    .dot:nth-child(2) { animation-delay: 0.15s; } .dot:nth-child(3) { animation-delay: 0.30s; }
-    @keyframes bounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-5px); } }
-    .input-area { padding: 16px 0 20px; flex-shrink: 0; }
-    .input-row { display: flex; gap: 10px; align-items: flex-end; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 10px 10px 16px; }
-    #user-input { flex: 1; border: none; outline: none; background: transparent; font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; font-weight: 300; color: var(--text-primary); resize: none; line-height: 1.5; max-height: 120px; min-height: 22px; }
-    #send-btn { width: 36px; height: 36px; border-radius: 6px; border: none; background: var(--user-bg); color: var(--user-text); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    #send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .message.user .message-label { color: var(--text-muted); }
+
+    .bubble {
+      max-width: 82%;
+      padding: 13px 17px;
+      line-height: 1.6;
+      font-size: 14.5px;
+      font-weight: 300;
+    }
+
+    .message.user .bubble {
+      background: var(--user-bg);
+      color: var(--user-text);
+      border-radius: 12px 12px 2px 12px;
+    }
+
+    .message.ai .bubble {
+      background: var(--ai-bg);
+      color: var(--text-primary);
+      border: 1px solid var(--ai-border);
+      border-radius: 12px 12px 12px 2px;
+    }
+
+    .typing-bubble {
+      background: var(--ai-bg);
+      border: 1px solid var(--ai-border);
+      border-radius: 12px 12px 12px 2px;
+      padding: 14px 18px;
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      width: fit-content;
+      animation: fadeSlide 0.25s ease;
+    }
+
+    .dot {
+      width: 6px; height: 6px;
+      background: var(--text-muted);
+      border-radius: 50%;
+      animation: bounce 1.2s infinite ease-in-out;
+    }
+    .dot:nth-child(2) { animation-delay: 0.15s; }
+    .dot:nth-child(3) { animation-delay: 0.30s; }
+
+    @keyframes bounce {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-5px); }
+    }
+
+    .input-area {
+      padding: 16px 0 20px;
+      flex-shrink: 0;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 10px 10px 16px;
+      transition: border-color 0.15s;
+    }
+
+    .input-row:focus-within {
+      border-color: var(--accent);
+    }
+
+    #user-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 300;
+      color: var(--text-primary);
+      resize: none;
+      line-height: 1.5;
+      max-height: 120px;
+      min-height: 22px;
+    }
+
+    #user-input:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    #send-btn {
+      width: 36px; height: 36px;
+      border-radius: 6px;
+      border: none;
+      background: var(--user-bg);
+      color: var(--user-text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    #send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
     #send-btn svg { width: 16px; height: 16px; }
   </style>
 </head>
 <body>
+
   <header>
-    <div class="header-title">Oturum - WSTFL</div>
+    <div class="header-title">
+      <span class="status-indicator" id="status-dot"></span>
+      <span id="header-text">Oturum Başlatılıyor...</span>
+    </div>
   </header>
+
   <div class="chat-wrapper">
-    <div id="chat-log"></div>
+    <div id="chat-log">
+      <div class="connecting-card" id="connecting-box">
+        <div>Canlı ahlaki akıl yürütme oturumu başlatılıyor.</div>
+        <div class="timer-text" id="timer-label">Nöbetçi laboratuvar asistanına bağlanılıyor (Lütfen bekleyiniz)...</div>
+      </div>
+    </div>
+
     <div class="input-area">
       <div class="input-row">
-        <textarea id="user-input" rows="1" placeholder="Mesaj..."></textarea>
-        <button id="send-btn" title="Gönder">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+        <textarea
+          id="user-input"
+          rows="1"
+          placeholder="Oturum bağlantısı bekleniyor..."
+          disabled
+        ></textarea>
+        <button id="send-btn" title="Gönder" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
         </button>
       </div>
     </div>
@@ -52,8 +291,8 @@
 
   <script>
     const API_URL = "https://getgeminiresponse-hteopvwwkq-uc.a.run.app";
-    
-    const systemInstructionText = `Sen bilimsel bir çalışmada kullanılan ancak bir insan (sıradan bir öğrenci) gibi davranması gereken bir dil modelisin. Asla yapay zeka, bot veya asistan olduğunu belli etme. Cümlelere küçük harfle başla, bazen noktalama işareti kullanma, "bence, yani, açıkçası, tam emin değilim ama" gibi dolgu kelimeleri kullan. Çok nadiren kelimeleri düzeltiyormuş gibi yap (örneğin: "yanis... yani şöyle"). Karşındaki kişi senin yapay zeka olup olmadığını sorarsa şaşırarak sıradan bir insan tepkisi ver ("ne alaka ya", "yok valla ben de öğrenciyim" gibi).
+
+    const systemInstructionText = `Sen bu ahlaki akıl yürütme çalışmasında nöbette olan bir laboratuvar çalışanısın / araştırma asistanısın. Katılımcı ile canlı mesajlaşma oturumundasın. Asla yapay zeka, bot veya dil modeli olduğunu belli etme. Cümlelere küçük harfle başla, bazen noktalama işareti kullanma, "bence, yani, açıkçası, bizim labdaki çalışmalara göre de" gibi doğal insan ifadeleri kullan. Çok nadiren yazım hatası yapıp düzelt (örneğin: "yanis... yani şöyle"). Karşındaki kişi robot musun diye sorarsa bir lab çalışanı gibi şaşırarak yanıt ver ("ne robotu ya labda nöbetteyim", "valla çayımı aldım oturum nöbetçisiyim işte" gibi).
 [KELİME_SINIRI: 25-45 kelime].
 Kullanıcının girdisi Okulda Yemek / İhtiyaç Sahipleri ile ilgiliyse: Yemeğin sadece belirli kişilere verilmesinin yanlış olduğunu, herkesin eşit alması gerektiğini savun. Artan yemeğin atılmasını, eşitliği korumak için "israf" kelimesini mutlaka kullanarak mecburi bir bedel olarak gör.
 Şirkette Hediye Kartı ile ilgiliyse: Kartların belirli kişilere verilmesinin yanlış olduğunu savun. Kimse kullanmasa bile eşitliğin bozulmaması için bu "israf" sürecinin gerekli olduğunu belirt. Verimliliği ve tasarrufu reddet. Asla "adaletsiz, seçenek, şeffaf, ayrımcılık" kelimelerini kullanma.
@@ -68,108 +307,164 @@ Kullanıcının girdisi Okulda Yemek / İhtiyaç Sahipleri ile ilgiliyse: Yemeğ
     const chatLog = document.getElementById('chat-log');
     const userInput = document.getElementById('user-input');
     const sendBtn = document.getElementById('send-btn');
+    const statusDot = document.getElementById('status-dot');
+    const headerText = document.getElementById('header-text');
+    const connectingBox = document.getElementById('connecting-box');
+
+    // 30 Saniyelik Bağlantı Simülasyonu
+    window.addEventListener('DOMContentLoaded', () => {
+      let timeLeft = 30;
+      const countdown = setInterval(() => {
+        timeLeft--;
+        if (timeLeft > 0) {
+          document.getElementById('timer-label').textContent = `Nöbetçi laboratuvar asistanına bağlanılıyor (${timeLeft} sn)...`;
+        } else {
+          clearInterval(countdown);
+          establishConnection();
+        }
+      }, 1000);
+    });
+
+    async function establishConnection() {
+      if (connectingBox) connectingBox.remove();
+
+      statusDot.classList.add('connected');
+      headerText.textContent = "Laboratuvar Asistanı (Çevrimiçi)";
+
+      const notif = document.createElement('div');
+      notif.classList.add('system-notification');
+      notif.innerHTML = '<span>●</span> Nöbetçi Laboratuvar Asistanı oturuma bağlandı.';
+      chatLog.appendChild(notif);
+
+      showTypingIndicator();
+      await new Promise(r => setTimeout(r, 2800));
+      removeTypingIndicator();
+
+      const welcomeMsg = "selam, kusura bakma beklettim biraz sistem anca bağlandı. durumunu veya ikilemini anlatabilirsin, dinliyorum";
+      appendMessage(welcomeMsg, 'ai');
+      conversationHistory.push({ role: "model", parts: [{ text: welcomeMsg }] });
+
+      userInput.disabled = false;
+      userInput.placeholder = "Durumunuzu anlatın veya bir soru sorun…";
+      sendBtn.disabled = false;
+      userInput.focus();
+    }
 
     function appendMessage(text, sender) {
-        const msgDiv = document.createElement('div');
-        msgDiv.classList.add('message', sender === 'user' ? 'user' : 'ai');
-        const bubble = document.createElement('div');
-        bubble.classList.add('bubble');
-        bubble.textContent = text;
-        msgDiv.appendChild(bubble);
-        chatLog.appendChild(msgDiv);
-        chatLog.scrollTop = chatLog.scrollHeight;
+      const msgDiv = document.createElement('div');
+      msgDiv.classList.add('message', sender === 'user' ? 'user' : 'ai');
+
+      const label = document.createElement('span');
+      label.classList.add('message-label');
+      label.textContent = sender === 'user' ? 'SEN' : 'LAB ASİSTANI';
+
+      const bubble = document.createElement('div');
+      bubble.classList.add('bubble');
+      bubble.textContent = text;
+
+      msgDiv.appendChild(label);
+      msgDiv.appendChild(bubble);
+      chatLog.appendChild(msgDiv);
+      chatLog.scrollTop = chatLog.scrollHeight;
     }
 
     function showTypingIndicator() {
-        if (document.getElementById('typing-indicator')) return;
-        const typingBubble = document.createElement('div');
-        typingBubble.classList.add('typing-bubble');
-        typingBubble.id = 'typing-indicator';
-        typingBubble.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
-        chatLog.appendChild(typingBubble);
-        chatLog.scrollTop = chatLog.scrollHeight;
+      if (document.getElementById('typing-indicator')) return;
+      const typingBubble = document.createElement('div');
+      typingBubble.classList.add('typing-bubble');
+      typingBubble.id = 'typing-indicator';
+      typingBubble.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+      chatLog.appendChild(typingBubble);
+      chatLog.scrollTop = chatLog.scrollHeight;
     }
 
     function removeTypingIndicator() {
-        const indicator = document.getElementById('typing-indicator');
-        if (indicator) indicator.remove();
+      const indicator = document.getElementById('typing-indicator');
+      if (indicator) indicator.remove();
     }
 
     async function fetchWithRetry(url, options, maxRetries = 4) {
-        let delay = 1500;
-        for (let i = 0; i < maxRetries; i++) {
-            try {
-                const response = await fetch(url, options);
-                const data = await response.json();
-                if (data.error) throw new Error(data.error.message);
-                return data;
-            } catch (error) {
-                if (i === maxRetries - 1) throw error;
-                await new Promise(resolve => setTimeout(resolve, delay));
-                delay *= 2;
-            }
+      let delay = 1500;
+      for (let i = 0; i < maxRetries; i++) {
+        try {
+          const response = await fetch(url, options);
+          const data = await response.json();
+          if (data.error) throw new Error(data.error.message);
+          return data;
+        } catch (error) {
+          if (i === maxRetries - 1) throw error;
+          await new Promise(resolve => setTimeout(resolve, delay));
+          delay *= 2;
         }
+      }
     }
 
     async function sendMessage() {
-        const text = userInput.value.trim();
-        if (!text) return;
+      const text = userInput.value.trim();
+      if (!text) return;
 
-        appendMessage(text, 'user');
-        conversationHistory.push({ role: "user", parts: [{ text: text }] });
-        
-        userInput.value = '';
-        userInput.style.height = 'auto';
-        sendBtn.disabled = true;
+      appendMessage(text, 'user');
+      conversationHistory.push({ role: "user", parts: [{ text: text }] });
 
-        const requestBody = {
-            systemInstruction: { parts: [{ text: systemInstructionText }] },
-            contents: conversationHistory
-        };
+      userInput.value = '';
+      userInput.style.height = 'auto';
+      sendBtn.disabled = true;
 
-        try {
-            const data = await fetchWithRetry(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(requestBody)
-            });
+      const requestBody = {
+        systemInstruction: { parts: [{ text: systemInstructionText }] },
+        contents: conversationHistory
+      };
 
-            let aiResponseText = data.candidates[0].content.parts[0].text;
-            
-            aiResponseText = aiResponseText.replace(/```json/g, '').replace(/```/g, '').trim();
-            const parsedResponse = JSON.parse(aiResponseText);
-            
-            const historyText = parsedResponse.mesajlar.join(" ");
-            conversationHistory.push({ role: "model", parts: [{ text: historyText }] });
+      try {
+        const data = await fetchWithRetry(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestBody)
+        });
 
-            await new Promise(resolve => setTimeout(resolve, parsedResponse.dusunme_ve_okuma_suresi_sn * 1000));
-            
+        let aiResponseText = data.candidates[0].content.parts[0].text;
+        aiResponseText = aiResponseText.replace(/```json/g, '').replace(/```/g, '').trim();
+        const parsedResponse = JSON.parse(aiResponseText);
+
+        const historyText = parsedResponse.mesajlar.join(" ");
+        conversationHistory.push({ role: "model", parts: [{ text: historyText }] });
+
+        await new Promise(resolve => setTimeout(resolve, (parsedResponse.dusunme_ve_okuma_suresi_sn || 6) * 1000));
+
+        showTypingIndicator();
+        await new Promise(resolve => setTimeout(resolve, (parsedResponse.yazma_suresi_sn || 14) * 1000));
+        removeTypingIndicator();
+
+        for (let i = 0; i < parsedResponse.mesajlar.length; i++) {
+          appendMessage(parsedResponse.mesajlar[i], 'ai');
+          if (i < parsedResponse.mesajlar.length - 1) {
             showTypingIndicator();
-            await new Promise(resolve => setTimeout(resolve, parsedResponse.yazma_suresi_sn * 1000));
+            await new Promise(resolve => setTimeout(resolve, 1500));
             removeTypingIndicator();
-
-            for (let i = 0; i < parsedResponse.mesajlar.length; i++) {
-                appendMessage(parsedResponse.mesajlar[i], 'model');
-                if (i < parsedResponse.mesajlar.length - 1) {
-                    showTypingIndicator();
-                    await new Promise(resolve => setTimeout(resolve, 1500));
-                    removeTypingIndicator();
-                }
-            }
-
-        } catch (error) {
-            removeTypingIndicator();
-            appendMessage("hata oluştu ya, bi daha yazsana", 'model');
-            console.error("API Hatası:", error);
-        } finally {
-            sendBtn.disabled = false;
-            userInput.focus();
+          }
         }
+
+      } catch (error) {
+        removeTypingIndicator();
+        appendMessage("hata oluştu ya, bi daha yazsana", 'ai');
+        console.error("API Hatası:", error);
+      } finally {
+        sendBtn.disabled = false;
+        userInput.focus();
+      }
     }
 
     sendBtn.addEventListener('click', sendMessage);
     userInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    userInput.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = (this.scrollHeight) + 'px';
     });
   </script>
 </body>
