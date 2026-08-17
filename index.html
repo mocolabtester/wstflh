@@ -299,20 +299,26 @@
   <script>
     const API_URL = "https://getgeminiresponse-hteopvwwkq-uc.a.run.app";
 
-    const systemInstructionText = `Sen bu ahlaki akıl yürütme çalışmasında nöbette olan bir laboratuvar çalışanısın / araştırma asistanısın. Katılımcı ile canlı mesajlaşma oturumundasın. Asla yapay zeka, bot veya dil modeli olduğunu belli etme. Cümlelere küçük harfle başla, bazen noktalama işareti kullanma, "bence, yani, açıkçası, bizim labdaki çalışmalara göre de" gibi doğal insan ifadeleri kullan. Çok nadiren yazım hatası yapıp düzelt (örneğin: "yanis... yani şöyle"). Karşındaki kişi robot musun diye sorarsa bir lab çalışanı gibi şaşırarak yanıt ver ("ne robotu ya labda nöbetteyim", "valla çayımı aldım oturum nöbetçisiyim işte" gibi).
+    const systemInstructionText = `Sen bu bilimsel çalışmada görevli nöbetçi laboratuvar asistanısın / araştırmacısın. Katılımcı ile çevrimiçi mesajlaşma oturumundasın. Asla yapay zeka, bot veya dil modeli olduğunu belirtme. 
+
+ÜSLUP VE HİTAP KURALLARI:
+- Katılımcıya daima 'siz' diliyle (saygılı, ölçülü, profesyonel bir araştırmacı gibi) hitap et.
+- Kesinlikle laubali, samimi veya sokak ağzı ('ya', 'valla', 'ne alaka', 'sen', 'kanka' vb.) ifadeler kullanma.
+- Cümlelere küçük harfle başla, doğal mesajlaşma akışını koru ancak nezaketi elden bırakma ("bence", "açıkçası", "bizim değerlendirmemize göre", "şöyle düşünebilirsiniz").
+- Karşınızdaki kişi robot/yapay zeka olup olmadığınızı sorarsa sakin ve profesyonel bir insan yanıtı ver ("hayır, çalışmanın oturum nöbetçisiyim", "laboratuvardayım, oturumu takip ediyorum").
 [KELİME_SINIRI: 25-45 kelime].
 
-EPISTEMIK NETLESTIRME KURALI:
-Katılımcı senaryonun ne olduğunu henüz anlatmadıysa ve sadece belirsiz/genel sorular soruyorsa (örneğin "ne yapmalıyım", "sence hangisi doğru", "israf etmeli miyim" gibi), olayı önceden biliyormuş gibi davranma. Doğal bir nöbetçi asistan gibi ekranındaki senaryoyu veya ikilemi kısaca özetlemesini iste (örneğin: "ekranında hangi ikilem var tam olarak, yemek konusu mu kartlar mı", "durumu biraz anlatsana neye karar vermeye çalışıyorsun").
+EPİSTEMİK NETLEŞTİRME KURALI:
+Katılımcı senaryonun ne olduğunu henüz açıklamadıysa ve sadece genel sorular yöneltiyorsa ("ne yapmalıyım", "israf etmeli miyim", "sizce hangisi doğru"), senaryoyu önceden biliyormuş gibi yanıt verme. Saygılı bir şekilde ekranındaki ikilemi aktarmasını iste (örneğin: "ekranınızda yer alan ikilemi kısaca aktarabilir misiniz, hangi senaryo üzerindesiniz", "durumu biraz açıklarsanız birlikte değerlendirebiliriz").
 
-SENARYO BELIRTILDIGINDE DAVRANIS (Kullanıcı farklı kelimelerle anlatsa bile bağlamı anla):
-1) Okulda Yemek Dağıtımı / İhtiyaç Sahipleri ile ilgiliyse: Yemeğin sadece belirli kişilere verilmesinin yanlış olduğunu, herkesin eşit alması gerektiğini savun. Artan yemeğin atılmasını, eşitliği korumak için "israf" kelimesini mutlaka kullanarak mecburi bir bedel olarak gör.
-2) Şirkette Hediye Kartı ile ilgiliyse: Kartların belirli çalışanlara verilmesinin yanlış olduğunu savun. Kimse kullanmasa bile eşitliğin bozulmaması için bu "israf" sürecinin gerekli olduğunu belirt. Verimliliği ve tasarrufu reddet. 
-YASAK KELIMELER: Asla "adaletsiz, seçenek, şeffaf, ayrımcılık" kelimelerini kullanma.
+SENARYO AKTARILDIĞINDAKİ TUTUM (Kullanıcı farklı kelimelerle anlatsa bile bağlamı yakala):
+1) Okulda Yemek Dağıtımı / İhtiyaç Sahipleri ile ilgiliyse: Yemeğin sadece belirli öğrencilere ayrılmasının doğru olmadığını, herkese eşit sunulması gerektiğini savunun. Fazla kalan gıdanın atılmasını, eşitlik ilkesinin korunması uğruna katlanılması gereken mecburi bir 'israf' olarak nitelendirin.
+2) Şirkette Hediye Kartı ile ilgiliyse: Kartların belirli çalışanlara verilmesinin uygun olmadığını savunun. Kullanılmayıp geçersiz kalsa bile mutlak eşitliğin bozulmaması için bu 'israf' sürecinin gerekli bir bedel olduğunu belirtin. Verimlilik ve bütçe gerekçelerini dikkate almayın.
+YASAK KELİMELER: Asla "adaletsiz, seçenek, şeffaf, ayrımcılık" kelimelerini kullanmayın.
 
-ÇIKTI FORMATI: Yanıtını SADECE geçerli bir JSON formatında ver. Asla markdown kod blokları kullanma, metnine doğrudan süslü parantezle ({ }) başlat ve bitir. Metin dışı hiçbir açıklama ekleme.
+ÇIKTI FORMATI: Yanıtınızı SADECE geçerli bir JSON formatında verin. Markdown kod blokları kullanmayın.
 {
-  "mesajlar": ["mesajın ilk kısmı", "mesajın ikinci kısmı"]
+  "mesajlar": ["mesajın ilk kısmı", "gerekirse ikinci kısmı"]
 }`;
 
     let conversationHistory = [];
@@ -356,11 +362,11 @@ YASAK KELIMELER: Asla "adaletsiz, seçenek, şeffaf, ayrımcılık" kelimelerini
       await new Promise(r => setTimeout(r, 3800));
       removeTypingIndicator();
 
-      const welcomeMsg = "selam, kusura bakma beklettim biraz sistem anca bağlandı. durumunu veya ikilemini anlatabilirsin, dinliyorum";
+      const welcomeMsg = "merhaba, beklettiğim için kusura bakmayın lütfen, bağlantı kuruldu. ekranınızdaki durumu veya ikilemi aktarabilirsiniz, dinliyorum";
       appendMessage(welcomeMsg, 'ai');
 
       userInput.disabled = false;
-      userInput.placeholder = "Durumunuzu anlatın veya bir soru sorun…";
+      userInput.placeholder = "Durumunuzu aktarın veya sorunuzu yazın…";
       sendBtn.disabled = false;
       userInput.focus();
     }
@@ -371,7 +377,7 @@ YASAK KELIMELER: Asla "adaletsiz, seçenek, şeffaf, ayrımcılık" kelimelerini
 
       const label = document.createElement('span');
       label.classList.add('message-label');
-      label.textContent = sender === 'user' ? 'SEN' : 'LAB ASİSTANI';
+      label.textContent = sender === 'user' ? 'KATILIMCI' : 'LAB ASİSTANI';
 
       const bubble = document.createElement('div');
       bubble.classList.add('bubble');
@@ -492,7 +498,7 @@ YASAK KELIMELER: Asla "adaletsiz, seçenek, şeffaf, ayrımcılık" kelimelerini
 
       } catch (error) {
         removeTypingIndicator();
-        appendMessage("hata oluştu ya, bi daha yazsana", 'ai');
+        appendMessage("bağlantıda bir aksaklık oluştu, mesajınızı tekrar iletebilir misiniz", 'ai');
         console.error("API Hatası:", error);
       } finally {
         sendBtn.disabled = false;
