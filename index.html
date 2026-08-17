@@ -305,8 +305,6 @@ Kullanıcının girdisi Okulda Yemek / İhtiyaç Sahipleri ile ilgiliyse: Yemeğ
 Şirkette Hediye Kartı ile ilgiliyse: Kartların belirli kişilere verilmesinin yanlış olduğunu savun. Kimse kullanmasa bile eşitliğin bozulmaması için bu "israf" sürecinin gerekli olduğunu belirt. Verimliliği ve tasarrufu reddet. Asla "adaletsiz, seçenek, şeffaf, ayrımcılık" kelimelerini kullanma.
 ÇIKTI FORMATI: Yanıtını SADECE geçerli bir JSON formatında ver. Asla markdown kod blokları kullanma, metnine doğrudan süslü parantezle ({ }) başlat ve bitir. Metin dışı hiçbir açıklama ekleme.
 {
-  "dusunme_ve_okuma_suresi_sn": 5,
-  "yazma_suresi_sn": 15,
   "mesajlar": ["mesajın ilk kısmı", "mesajın ikinci kısmı"]
 }`;
 
@@ -426,46 +424,60 @@ Kullanıcının girdisi Okulda Yemek / İhtiyaç Sahipleri ile ilgiliyse: Yemeğ
       };
 
       try {
-        const data = await fetchWithRetry(API_URL, {
+        // 1. Dinamik Okuma ve Düşünme Süresi (Kullanıcı mesaj uzunluğuna göre)
+        const userCharCount = text.length;
+        const baseReadingTime = 4000;
+        const perCharReading = userCharCount * 65;
+        const readingJitter = Math.floor(Math.random() * 2500);
+        const totalReadingDelay = Math.min(22000, baseReadingTime + perCharReading + readingJitter);
+
+        const apiPromise = fetchWithRetry(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(requestBody)
         });
 
+        // Kullanıcının mesajını okuma duraksaması
+        await new Promise(resolve => setTimeout(resolve, totalReadingDelay));
+
+        const data = await apiPromise;
         let rawText = data.candidates[0].content.parts[0].text;
         
         let parsedResponse;
         const jsonMatch = rawText.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
-          parsedResponse = JSON.parse(jsonMatch[0]);
+          try {
+            parsedResponse = JSON.parse(jsonMatch[0]);
+          } catch (e) {
+            parsedResponse = { mesajlar: [rawText] };
+          }
         } else {
-          parsedResponse = {
-            dusunme_ve_okuma_suresi_sn: 6,
-            yazma_suresi_sn: 14,
-            mesajlar: [rawText]
-          };
+          parsedResponse = { mesajlar: [rawText] };
         }
 
         const historyText = Array.isArray(parsedResponse.mesajlar) ? parsedResponse.mesajlar.join(" ") : rawText;
         conversationHistory.push({ role: "model", parts: [{ text: historyText }] });
 
-        // Düşünme/okuma payını 1.5 katına çıkarma
-        const readingDelay = ((parsedResponse.dusunme_ve_okuma_suresi_sn || 6) * 1.5) * 1000;
-        await new Promise(resolve => setTimeout(resolve, readingDelay));
+        // 2. İlk Mesaj İçin Dinamik Yazma Süresi (Metin hacmine göre gerçekçi klavye hızı)
+        const firstMsg = Array.isArray(parsedResponse.mesajlar) ? parsedResponse.mesajlar[0] : rawText;
+        const firstMsgCharCount = firstMsg.length;
+        const baseTypingPrep = 2500;
+        const perCharTyping = firstMsgCharCount * 110;
+        const typingJitter = Math.floor(Math.random() * 2000);
+        const totalTypingDelay = Math.min(38000, baseTypingPrep + perCharTyping + typingJitter);
 
-        // İlk mesaj için yazıyor simülasyonu
         showTypingIndicator();
-        await new Promise(resolve => setTimeout(resolve, (parsedResponse.yazma_suresi_sn || 14) * 1000));
+        await new Promise(resolve => setTimeout(resolve, totalTypingDelay));
         removeTypingIndicator();
 
         if (Array.isArray(parsedResponse.mesajlar)) {
           for (let i = 0; i < parsedResponse.mesajlar.length; i++) {
             if (i > 0) {
-              await new Promise(resolve => setTimeout(resolve, 1000));
+              await new Promise(resolve => setTimeout(resolve, 1800));
               showTypingIndicator();
               const subLength = parsedResponse.mesajlar[i].length;
-              const dynamicTyping = Math.max(3200, Math.min(6500, subLength * 75));
-              await new Promise(resolve => setTimeout(resolve, dynamicTyping));
+              const subTypingDelay = Math.max(3500, Math.min(18000, 2000 + (subLength * 105)));
+              await new Promise(resolve => setTimeout(resolve, subTypingDelay));
               removeTypingIndicator();
             }
             appendMessage(parsedResponse.mesajlar[i], 'ai');
@@ -499,5 +511,3 @@ Kullanıcının girdisi Okulda Yemek / İhtiyaç Sahipleri ile ilgiliyse: Yemeğ
   </script>
 </body>
 </html>
- 
- 
