@@ -318,7 +318,6 @@ Kullanıcının girdisi Okulda Yemek / İhtiyaç Sahipleri ile ilgiliyse: Yemeğ
     const headerText = document.getElementById('header-text');
     const connectingBox = document.getElementById('connecting-box');
 
-    // 0'dan Başlayıp 32. Saniyede Bağlanan Sayaç
     window.addEventListener('DOMContentLoaded', () => {
       let elapsedTime = 0;
       const targetTime = 32;
@@ -346,8 +345,10 @@ Kullanıcının girdisi Okulda Yemek / İhtiyaç Sahipleri ile ilgiliyse: Yemeğ
       notif.innerHTML = '<span>●</span> Nöbetçi Laboratuvar Asistanı oturuma bağlandı.';
       chatLog.appendChild(notif);
 
+      await new Promise(r => setTimeout(r, 1200));
+
       showTypingIndicator();
-      await new Promise(r => setTimeout(r, 2500));
+      await new Promise(r => setTimeout(r, 3800));
       removeTypingIndicator();
 
       const welcomeMsg = "selam, kusura bakma beklettim biraz sistem anca bağlandı. durumunu veya ikilemini anlatabilirsin, dinliyorum";
@@ -439,8 +440,8 @@ Kullanıcının girdisi Okulda Yemek / İhtiyaç Sahipleri ile ilgiliyse: Yemeğ
           parsedResponse = JSON.parse(jsonMatch[0]);
         } else {
           parsedResponse = {
-            dusunme_ve_okuma_suresi_sn: 5,
-            yazma_suresi_sn: 12,
+            dusunme_ve_okuma_suresi_sn: 6,
+            yazma_suresi_sn: 14,
             mesajlar: [rawText]
           };
         }
@@ -448,20 +449,26 @@ Kullanıcının girdisi Okulda Yemek / İhtiyaç Sahipleri ile ilgiliyse: Yemeğ
         const historyText = Array.isArray(parsedResponse.mesajlar) ? parsedResponse.mesajlar.join(" ") : rawText;
         conversationHistory.push({ role: "model", parts: [{ text: historyText }] });
 
-        await new Promise(resolve => setTimeout(resolve, (parsedResponse.dusunme_ve_okuma_suresi_sn || 5) * 1000));
+        // Düşünme/okuma payını 1.5 katına çıkarma
+        const readingDelay = ((parsedResponse.dusunme_ve_okuma_suresi_sn || 6) * 1.5) * 1000;
+        await new Promise(resolve => setTimeout(resolve, readingDelay));
 
+        // İlk mesaj için yazıyor simülasyonu
         showTypingIndicator();
-        await new Promise(resolve => setTimeout(resolve, (parsedResponse.yazma_suresi_sn || 12) * 1000));
+        await new Promise(resolve => setTimeout(resolve, (parsedResponse.yazma_suresi_sn || 14) * 1000));
         removeTypingIndicator();
 
         if (Array.isArray(parsedResponse.mesajlar)) {
           for (let i = 0; i < parsedResponse.mesajlar.length; i++) {
-            appendMessage(parsedResponse.mesajlar[i], 'ai');
-            if (i < parsedResponse.mesajlar.length - 1) {
+            if (i > 0) {
+              await new Promise(resolve => setTimeout(resolve, 1000));
               showTypingIndicator();
-              await new Promise(resolve => setTimeout(resolve, 1500));
+              const subLength = parsedResponse.mesajlar[i].length;
+              const dynamicTyping = Math.max(3200, Math.min(6500, subLength * 75));
+              await new Promise(resolve => setTimeout(resolve, dynamicTyping));
               removeTypingIndicator();
             }
+            appendMessage(parsedResponse.mesajlar[i], 'ai');
           }
         } else {
           appendMessage(rawText, 'ai');
