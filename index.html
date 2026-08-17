@@ -311,13 +311,13 @@ Kullanıcının girdisi Okulda Yemek / İhtiyaç Sahipleri ile ilgiliyse: Yemeğ
     const headerText = document.getElementById('header-text');
     const connectingBox = document.getElementById('connecting-box');
 
-    // 30 Saniyelik Bağlantı Simülasyonu
     window.addEventListener('DOMContentLoaded', () => {
       let timeLeft = 30;
       const countdown = setInterval(() => {
         timeLeft--;
         if (timeLeft > 0) {
-          document.getElementById('timer-label').textContent = `Nöbetçi laboratuvar asistanına bağlanılıyor (${timeLeft} sn)...`;
+          const timerLabel = document.getElementById('timer-label');
+          if (timerLabel) timerLabel.textContent = `Nöbetçi laboratuvar asistanına bağlanılıyor (${timeLeft} sn)...`;
         } else {
           clearInterval(countdown);
           establishConnection();
@@ -337,12 +337,11 @@ Kullanıcının girdisi Okulda Yemek / İhtiyaç Sahipleri ile ilgiliyse: Yemeğ
       chatLog.appendChild(notif);
 
       showTypingIndicator();
-      await new Promise(r => setTimeout(r, 2800));
+      await new Promise(r => setTimeout(r, 2500));
       removeTypingIndicator();
 
       const welcomeMsg = "selam, kusura bakma beklettim biraz sistem anca bağlandı. durumunu veya ikilemini anlatabilirsin, dinliyorum";
       appendMessage(welcomeMsg, 'ai');
-      conversationHistory.push({ role: "model", parts: [{ text: welcomeMsg }] });
 
       userInput.disabled = false;
       userInput.placeholder = "Durumunuzu anlatın veya bir soru sorun…";
@@ -422,26 +421,40 @@ Kullanıcının girdisi Okulda Yemek / İhtiyaç Sahipleri ile ilgiliyse: Yemeğ
           body: JSON.stringify(requestBody)
         });
 
-        let aiResponseText = data.candidates[0].content.parts[0].text;
-        aiResponseText = aiResponseText.replace(/```json/g, '').replace(/```/g, '').trim();
-        const parsedResponse = JSON.parse(aiResponseText);
+        let rawText = data.candidates[0].content.parts[0].text;
+        
+        let parsedResponse;
+        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          parsedResponse = JSON.parse(jsonMatch[0]);
+        } else {
+          parsedResponse = {
+            dusunme_ve_okuma_suresi_sn: 5,
+            yazma_suresi_sn: 12,
+            mesajlar: [rawText]
+          };
+        }
 
-        const historyText = parsedResponse.mesajlar.join(" ");
+        const historyText = Array.isArray(parsedResponse.mesajlar) ? parsedResponse.mesajlar.join(" ") : rawText;
         conversationHistory.push({ role: "model", parts: [{ text: historyText }] });
 
-        await new Promise(resolve => setTimeout(resolve, (parsedResponse.dusunme_ve_okuma_suresi_sn || 6) * 1000));
+        await new Promise(resolve => setTimeout(resolve, (parsedResponse.dusunme_ve_okuma_suresi_sn || 5) * 1000));
 
         showTypingIndicator();
-        await new Promise(resolve => setTimeout(resolve, (parsedResponse.yazma_suresi_sn || 14) * 1000));
+        await new Promise(resolve => setTimeout(resolve, (parsedResponse.yazma_suresi_sn || 12) * 1000));
         removeTypingIndicator();
 
-        for (let i = 0; i < parsedResponse.mesajlar.length; i++) {
-          appendMessage(parsedResponse.mesajlar[i], 'ai');
-          if (i < parsedResponse.mesajlar.length - 1) {
-            showTypingIndicator();
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            removeTypingIndicator();
+        if (Array.isArray(parsedResponse.mesajlar)) {
+          for (let i = 0; i < parsedResponse.mesajlar.length; i++) {
+            appendMessage(parsedResponse.mesajlar[i], 'ai');
+            if (i < parsedResponse.mesajlar.length - 1) {
+              showTypingIndicator();
+              await new Promise(resolve => setTimeout(resolve, 1500));
+              removeTypingIndicator();
+            }
           }
+        } else {
+          appendMessage(rawText, 'ai');
         }
 
       } catch (error) {
@@ -469,4 +482,3 @@ Kullanıcının girdisi Okulda Yemek / İhtiyaç Sahipleri ile ilgiliyse: Yemeğ
   </script>
 </body>
 </html>
- 
