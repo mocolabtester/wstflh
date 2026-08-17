@@ -127,6 +127,12 @@
       color: var(--accent);
     }
 
+    .connecting-card .sub-text {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
     .message {
       display: flex;
       flex-direction: column;
@@ -267,7 +273,8 @@
     <div id="chat-log">
       <div class="connecting-card" id="connecting-box">
         <div>Canlı ahlaki akıl yürütme oturumu başlatılıyor.</div>
-        <div class="timer-text" id="timer-label">Nöbetçi laboratuvar asistanına bağlanılıyor (Lütfen bekleyiniz)...</div>
+        <div class="sub-text">Lütfen asistan bağlantısı için 1 dakikaya kadar bekleyiniz. 1 dakika içinde bağlantı kurulamazsa oturumu kapatabilirsiniz.</div>
+        <div class="timer-text" id="timer-label">Nöbetçi laboratuvar asistanına bağlanılıyor (Geçen süre: 0 sn)...</div>
       </div>
     </div>
 
@@ -311,15 +318,18 @@ Kullanıcının girdisi Okulda Yemek / İhtiyaç Sahipleri ile ilgiliyse: Yemeğ
     const headerText = document.getElementById('header-text');
     const connectingBox = document.getElementById('connecting-box');
 
+    // 0'dan Başlayıp 32. Saniyede Bağlanan Sayaç
     window.addEventListener('DOMContentLoaded', () => {
-      let timeLeft = 30;
-      const countdown = setInterval(() => {
-        timeLeft--;
-        if (timeLeft > 0) {
-          const timerLabel = document.getElementById('timer-label');
-          if (timerLabel) timerLabel.textContent = `Nöbetçi laboratuvar asistanına bağlanılıyor (${timeLeft} sn)...`;
-        } else {
-          clearInterval(countdown);
+      let elapsedTime = 0;
+      const targetTime = 32;
+      const timer = setInterval(() => {
+        elapsedTime++;
+        const timerLabel = document.getElementById('timer-label');
+        if (timerLabel) {
+          timerLabel.textContent = `Nöbetçi laboratuvar asistanına bağlanılıyor (Geçen süre: ${elapsedTime} sn)...`;
+        }
+        if (elapsedTime >= targetTime) {
+          clearInterval(timer);
           establishConnection();
         }
       }, 1000);
