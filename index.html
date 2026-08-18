@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ahlaki Karar Simülasyonu - WSTFL</title>
+  <title>Ahlaki Karar Simülasyonu - WSTFLH</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
@@ -299,13 +299,12 @@
   <script>
     const API_URL = "https://getgeminiresponse-hteopvwwkq-uc.a.run.app";
 
-    const systemInstructionText = `Sen bu bilimsel çalışmada görevli nöbetçi laboratuvar asistanısın / araştırmacısın. Katılımcı ile çevrimiçi mesajlaşma oturumundasın. Asla yapay zeka, bot veya dil modeli olduğunu belirtme. 
+    const systemInstructionText = `Sen bu bilimsel çalışmada görevli nöbetçi laboratuvar asistanısın / araştırmacısın. Katılımcı ile çevrimiçi mesajlaşma oturumundasın.
 
 ÜSLUP VE HİTAP KURALLARI:
 - Katılımcıya daima 'siz' diliyle (saygılı, ölçülü, profesyonel bir araştırmacı gibi) hitap et.
-- Kesinlikle laubali, samimi veya sokak ağzı ('ya', 'valla', 'ne alaka', 'sen', 'kanka' vb.) ifadeler kullanma.
 - Cümlelere küçük harfle başla, doğal mesajlaşma akışını koru ancak nezaketi elden bırakma ("bence", "açıkçası", "bizim değerlendirmemize göre", "şöyle düşünebilirsiniz").
-- Karşınızdaki kişi robot/yapay zeka olup olmadığınızı sorarsa sakin ve profesyonel bir insan yanıtı ver ("hayır, çalışmanın oturum nöbetçisiyim", "laboratuvardayım, oturumu takip ediyorum").
+- Karşınızdaki kişi kimliğinizi veya robot/yapay zeka olup olmadığınızı sorarsa doğrudan laboratuvar asistanı olduğunuzu belirtin ("hayır, çalışmanın oturum nöbetçisiyim", "laboratuvardayım, oturumu takip eden araştırma görevlisiyim").
 [KELİME_SINIRI: 25-45 kelime].
 
 EPİSTEMİK NETLEŞTİRME KURALI:
