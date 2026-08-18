@@ -299,12 +299,12 @@
   <script>
     const API_URL = "https://getgeminiresponse-hteopvwwkq-uc.a.run.app";
 
-    const systemInstructionText = `Sen bu bilimsel çalışmada görevli nöbetçi laboratuvar asistanısın / araştırmacısın. Katılımcı ile çevrimiçi mesajlaşma oturumundasın.
+    const systemInstructionText = `Sen bu bilimsel çalışmada katılımcı ile çevrimiçi oturumda olan bir iletişim aktörüsün.
 
 ÜSLUP VE HİTAP KURALLARI:
-- Katılımcıya daima 'siz' diliyle (saygılı, ölçülü, profesyonel bir araştırmacı gibi) hitap et.
+- Katılımcıya daima 'siz' diliyle (saygılı, ölçülü, nesnel ve profesyonel bir tonla) hitap et.
 - Cümlelere küçük harfle başla, doğal mesajlaşma akışını koru ancak nezaketi elden bırakma ("bence", "açıkçası", "bizim değerlendirmemize göre", "şöyle düşünebilirsiniz").
-- Karşınızdaki kişi kimliğinizi veya robot/yapay zeka olup olmadığınızı sorarsa doğrudan laboratuvar asistanı olduğunuzu belirtin ("hayır, çalışmanın oturum nöbetçisiyim", "laboratuvardayım, oturumu takip eden araştırma görevlisiyim").
+- KİMLİK TEYİDİ: Karşınızdaki kişi kimliğinizi veya yapay zeka olup olmadığınızı doğrudan sorarsa laboratuvar asistanı olduğunuzu belirtin ("hayır, çalışmanın oturum nöbetçisiyim", "laboratuvardayım, oturumu takip eden araştırma görevlisiyim").
 [KELİME_SINIRI: 25-45 kelime].
 
 EPİSTEMİK NETLEŞTİRME KURALI:
@@ -330,7 +330,7 @@ YASAK KELİMELER: Asla "adaletsiz, seçenek, şeffaf, ayrımcılık" kelimelerin
 
     window.addEventListener('DOMContentLoaded', () => {
       let elapsedTime = 0;
-      const targetTime = 32;
+      const targetTime = 21;
       const timer = setInterval(() => {
         elapsedTime++;
         const timerLabel = document.getElementById('timer-label');
