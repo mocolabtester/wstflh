@@ -590,10 +590,13 @@ DİYALOG KISITLAMALARI:
         if (Array.isArray(parsedResponse.mesajlar)) {
           for (let i = 0; i < parsedResponse.mesajlar.length; i++) {
             if (i > 0) {
-              await new Promise(resolve => setTimeout(resolve, 1000));
+              await new Promise(resolve => setTimeout(resolve, 1200));
               showTypingIndicator();
               const subLength = parsedResponse.mesajlar[i].length;
-              const subTypingDelay = Math.min(6000, 1500 + (subLength * 40));
+              const subBase = 1500;
+              const subPerChar = subLength * 85;
+              const subJitter = Math.floor(Math.random() * 1000);
+              const subTypingDelay = Math.min(22000, Math.max(4000, subBase + subPerChar + subJitter));
               await new Promise(resolve => setTimeout(resolve, subTypingDelay));
               removeTypingIndicator();
             }
