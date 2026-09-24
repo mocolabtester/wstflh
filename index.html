@@ -442,13 +442,19 @@ DİYALOG KISITLAMALARI:
       notif.innerHTML = '<span>●</span> Nöbetçi Laboratuvar Asistanı oturuma bağlandı.';
       chatLog.appendChild(notif);
 
-      await new Promise(r => setTimeout(r, 600));
+      const welcomeMsg = "merhaba, beklettiğim için kusura bakmayın lütfen, bağlantı kuruldu. az önce anket sayfasında okuduğunuz ikilemi ve bu durumdaki kararınızı kısaca aktarabilirsiniz, dinliyorum";
 
+      // İlk mesajda da gerçekçi klavye yazım gecikmesi (karakter başına ~85ms)
+      const baseTypingPrep = 2000;
+      const perCharTyping = welcomeMsg.length * 85;
+      const typingJitter = Math.floor(Math.random() * 1500);
+      const totalTypingDelay = Math.min(22000, Math.max(5000, baseTypingPrep + perCharTyping + typingJitter));
+
+      await new Promise(r => setTimeout(r, 1000));
       showTypingIndicator();
-      await new Promise(r => setTimeout(r, 1800));
+      await new Promise(r => setTimeout(r, totalTypingDelay));
       removeTypingIndicator();
 
-      const welcomeMsg = "merhaba, beklettiğim için kusura bakmayın lütfen, bağlantı kuruldu. az önce anket sayfasında okuduğunuz ikilemi ve bu durumdaki kararınızı kısaca aktarabilirsiniz, dinliyorum";
       appendMessage(welcomeMsg, 'ai');
 
       userInput.disabled = false;
