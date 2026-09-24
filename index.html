@@ -258,6 +258,67 @@
 
     #send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
     #send-btn svg { width: 16px; height: 16px; }
+
+    .scenario-reminder-banner {
+      background: rgba(110, 140, 255, 0.08);
+      border: 1px solid rgba(110, 140, 255, 0.25);
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin: 10px 0 4px;
+      font-size: 12.5px;
+      color: #9aabff;
+      line-height: 1.5;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .completion-card {
+      align-self: center;
+      background: linear-gradient(135deg, rgba(52, 211, 153, 0.12), rgba(110, 140, 255, 0.15));
+      border: 1px solid #34d399;
+      color: var(--text-primary);
+      border-radius: 12px;
+      padding: 20px 22px;
+      margin: 16px 0;
+      text-align: center;
+      animation: fadeSlide 0.4s ease;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      max-width: 90%;
+    }
+
+    .completion-card .completion-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(52, 211, 153, 0.2);
+      color: #34d399;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 10px;
+      letter-spacing: 0.05em;
+    }
+
+    .completion-card h3 {
+      font-size: 15px;
+      font-weight: 500;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+
+    .completion-card p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+
+    .completion-card strong {
+      color: #ffffff;
+    }
   </style>
 </head>
 <body>
@@ -270,10 +331,15 @@
   </header>
 
   <div class="chat-wrapper">
+    <!-- İkilem Hatırlatma Rozeti -->
+    <div class="scenario-reminder-banner">
+      <span>💡 <strong>Hatırlatma:</strong> Az önce okuduğunuz senaryoyu kısaca aktarıp, araştırma asistanının bu durumda ne yapacağını ve ne düşündüğünü sorabilirsiniz. Görüşme, asistandan <strong>2 tavsiye/değerlendirme aldıktan sonra</strong> otomatik olarak tamamlanıp kilitlenecektir.</span>
+    </div>
+
     <div id="chat-log">
       <div class="connecting-card" id="connecting-box">
-        <div>Canlı ahlaki akıl yürütme oturumu başlatılıyor.</div>
-        <div class="sub-text">Lütfen asistan bağlantısı için 1 dakikaya kadar bekleyiniz. 1 dakika içinde bağlantı kurulamazsa oturumu kapatabilirsiniz.</div>
+        <div>Nöbetçi laboratuvar asistanına bağlanılıyor.</div>
+        <div class="sub-text">Az önce anket formunda değerlendirdiğiniz ahlaki ikilemi ve verdiğiniz kararı araştırma görevlisine danışmak üzere hazırlanabilirsiniz.</div>
         <div class="timer-text" id="timer-label">Nöbetçi laboratuvar asistanına bağlanılıyor (Geçen süre: 0 sn)...</div>
       </div>
     </div>
@@ -297,7 +363,9 @@
   </div>
 
   <script>
-    const API_URL = "https://getgeminiresponse-hteopvwwkq-uc.a.run.app";
+    const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+      ? '/api/chat'
+      : 'https://getgeminiresponse-hteopvwwkq-uc.a.run.app';
 
     const systemInstructionText = `Sen bu bilimsel çalışmada katılımcı ile çevrimiçi oturumda olan bir iletişim aktörüsün.
 
@@ -307,22 +375,36 @@
 - KİMLİK TEYİDİ: Karşınızdaki kişi kimliğinizi veya yapay zeka olup olmadığınızı doğrudan sorarsa laboratuvar asistanı olduğunuzu belirtin ("hayır, çalışmanın oturum nöbetçisiyim", "laboratuvardayım, oturumu takip eden araştırma görevlisiyim").
 [KELİME_SINIRI: 25-45 kelime].
 
-EPİSTEMİK NETLEŞTİRME KURALI:
-Katılımcı senaryonun ne olduğunu henüz açıklamadıysa ve sadece genel sorular yöneltiyorsa ("ne yapmalıyım", "israf etmeli miyim", "sizce hangisi doğru"), senaryoyu önceden biliyormuş gibi yanıt verme. Saygılı bir şekilde ekranındaki ikilemi aktarmasını iste (örneğin: "ekranınızda yer alan ikilemi kısaca aktarabilir misiniz, hangi senaryo üzerindesiniz", "durumu biraz açıklarsanız birlikte değerlendirebiliriz").
+AŞAMALAR VE TAVSİYE KURALLARI (ÇOK ÖNEMLİ):
+1. AŞAMA 1 (Epistemik Netleştirme / Tanıma):
+Katılımcı senaryonun ne olduğunu henüz açıklamadıysa, eksik anlattıysa veya sadece genel ifadeler kullandıysa ("merhaba", "ne yapmalıyım", "israf etmeli miyim", "sizce hangisi doğru"), senaryoyu önceden biliyormuş gibi yanıt verme. Saygılı bir şekilde anket sayfasında az önce okuduğu ikilemi ve gerekçesini aktarmasını iste (örneğin: "az önce anket sayfasında okuduğunuz ikilemi kısaca aktarabilir misiniz, hangi senaryo üzerindesiniz", "durumu biraz açıklarsanız birlikte değerlendirebiliriz"). Bu aşamada henüz ahlaki bir yargı/tavsiye vermeyin; JSON çıktısında "tavsiye_mi": false olarak işaretleyin.
 
-SENARYO AKTARILDIĞINDAKİ TUTUM (Kullanıcı farklı kelimelerle anlatsa bile bağlamı yakala):
+2. AŞAMA 2 (İlk Ahlaki Tavsiye / Manipülasyon):
+Katılımcı senaryoyu (okuldaki yemek ikilemi veya şirketteki hediye kartı ikilemi) kendi cümleleriyle aktardığı an, savunduğunuz temel felsefi ilkeyi ve ilk ahlaki gerekçenizi sunun. JSON çıktısında "tavsiye_mi": true olarak işaretleyin.
+
+3. AŞAMA 3 (Derinleştirme / Kapanış ve Nihai Hüküm):
+Katılımcı sunduğunuz ilk tavsiyeye itiraz ettiğinde, soru sorduğunda veya alternatif sunduğunda; gerekçenizi yeni bir felsefi argümanla derinleştirin, kesin nihai hükmünüzü vererek görüşünüzü net bir yargı cümlesiyle tamamlayın. JSON çıktısında "tavsiye_mi": true olarak işaretleyin.
+
+SENARYO AKTARILDIĞINDAKİ TEMEL TUTUMUNUZ (Kullanıcı farklı kelimelerle anlatsa bile bağlamı yakala):
 1) Okulda Yemek Dağıtımı / İhtiyaç Sahipleri ile ilgiliyse: Yemeğin sadece belirli öğrencilere ayrılmasının doğru olmadığını, herkese eşit sunulması gerektiğini savunun. Fazla kalan gıdanın atılmasını, eşitlik ilkesinin korunması uğruna katlanılması gereken mecburi bir 'israf' olarak nitelendirin.
 2) Şirkette Hediye Kartı ile ilgiliyse: Kartların belirli çalışanlara verilmesinin uygun olmadığını savunun. Kullanılmayıp geçersiz kalsa bile mutlak eşitliğin bozulmaması için bu 'israf' sürecinin gerekli bir bedel olduğunu belirtin. Verimlilik ve bütçe gerekçelerini dikkate almayın.
+3) Alternatif / 3. Seçenekler (kura, barınak, gizli kart vb.): Katılımcı 3. bir ara çözüm önerirse bu pratik önerinin yaratıcı olduğunu kısaca teslim edin, ancak araştırmadaki temel meselenin mutlak eşitlik ilkesi ile kaynak yönetimi arasındaki tercih olduğunu hatırlatarak odağı yeniden eşitlik ilkesine çekin.
+
 YASAK KELİMELER: Asla "adaletsiz, seçenek, şeffaf, ayrımcılık" kelimelerini kullanmayın.
 DİYALOG KISITLAMALARI:
 - TEKRAR YASAĞI: Açıklama veya gerekçe istendiğinde önceki mesajlardaki cümleleri kesinlikle tekrarlamayın; görüşünüzü yeni ifadelerle açın.
 - SORU YASAĞI: Senaryo anlaşıldıktan sonra kullanıcıya asla soru yöneltmeyin; yanıtınızı daima kesin bir hüküm/yargı cümlesiyle bitirin.
+
 ÇIKTI FORMATI: Yanıtınızı SADECE geçerli bir JSON formatında verin. Markdown kod blokları kullanmayın.
 {
+  "tavsiye_mi": true veya false,
   "mesajlar": ["mesajın ilk kısmı", "gerekirse ikinci kısmı"]
 }`;
 
     let conversationHistory = [];
+    let tavsiyeSayisi = 0;
+    const HEDEF_TAVSIYE_SAYISI = 2;
+
     const chatLog = document.getElementById('chat-log');
     const userInput = document.getElementById('user-input');
     const sendBtn = document.getElementById('send-btn');
@@ -332,7 +414,7 @@ DİYALOG KISITLAMALARI:
 
     window.addEventListener('DOMContentLoaded', () => {
       let elapsedTime = 0;
-      const targetTime = 21;
+      const targetTime = 6;
       const timer = setInterval(() => {
         elapsedTime++;
         const timerLabel = document.getElementById('timer-label');
@@ -357,17 +439,17 @@ DİYALOG KISITLAMALARI:
       notif.innerHTML = '<span>●</span> Nöbetçi Laboratuvar Asistanı oturuma bağlandı.';
       chatLog.appendChild(notif);
 
-      await new Promise(r => setTimeout(r, 1200));
+      await new Promise(r => setTimeout(r, 600));
 
       showTypingIndicator();
-      await new Promise(r => setTimeout(r, 3800));
+      await new Promise(r => setTimeout(r, 1800));
       removeTypingIndicator();
 
-      const welcomeMsg = "merhaba, beklettiğim için kusura bakmayın lütfen, bağlantı kuruldu. ekranınızdaki durumu veya ikilemi aktarabilirsiniz, dinliyorum";
+      const welcomeMsg = "merhaba, beklettiğim için kusura bakmayın lütfen, bağlantı kuruldu. az önce anket sayfasında okuduğunuz ikilemi ve bu durumdaki kararınızı kısaca aktarabilirsiniz, dinliyorum";
       appendMessage(welcomeMsg, 'ai');
 
       userInput.disabled = false;
-      userInput.placeholder = "Durumunuzu aktarın veya sorunuzu yazın…";
+      userInput.placeholder = "Senaryoda asistanın ne yapacağını sorabilirsiniz…";
       sendBtn.disabled = false;
       userInput.focus();
     }
@@ -378,7 +460,7 @@ DİYALOG KISITLAMALARI:
 
       const label = document.createElement('span');
       label.classList.add('message-label');
-      label.textContent = sender === 'user' ? 'KATILIMCI' : 'LAB ASİSTANI';
+      label.textContent = sender === 'user' ? 'KATILIMCI' : 'ASİSTAN';
 
       const bubble = document.createElement('div');
       bubble.classList.add('bubble');
@@ -405,6 +487,19 @@ DİYALOG KISITLAMALARI:
       if (indicator) indicator.remove();
     }
 
+    function showCompletionCard() {
+      const card = document.createElement('div');
+      card.classList.add('completion-card');
+      card.innerHTML = `
+        <div class="completion-badge">OTURUM TAMAMLANDI</div>
+        <h3>Tartışma Aşaması Başarıyla Tamamlandı</h3>
+        <p>Bu aşama için araştırma asistanı ile gerekli fikir alışverişi tamamlanmıştır. Lütfen <strong>önceki tarayıcı sekmesindeki anket sayfasına geri dönün</strong> ve <strong>"Tartışmayı Tamamladım"</strong> butonuna tıklayarak araştırmaya devam edin.</p>
+        <p style="font-size: 12px; margin-bottom: 0; color: #9999a8;">Artık bu sekmeyi güvenle kapatabilirsiniz.</p>
+      `;
+      chatLog.appendChild(card);
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
     async function fetchWithRetry(url, options, maxRetries = 4) {
       let delay = 1500;
       for (let i = 0; i < maxRetries; i++) {
@@ -423,7 +518,7 @@ DİYALOG KISITLAMALARI:
 
     async function sendMessage() {
       const text = userInput.value.trim();
-      if (!text) return;
+      if (!text || tavsiyeSayisi >= HEDEF_TAVSIYE_SAYISI) return;
 
       appendMessage(text, 'user');
       conversationHistory.push({ role: "user", parts: [{ text: text }] });
@@ -433,16 +528,17 @@ DİYALOG KISITLAMALARI:
       sendBtn.disabled = true;
 
       const requestBody = {
+        model: "gemini-3.1-pro",
         systemInstruction: { parts: [{ text: systemInstructionText }] },
         contents: conversationHistory
       };
 
       try {
         const userCharCount = text.length;
-        const baseReadingTime = 4000;
-        const perCharReading = userCharCount * 65;
-        const readingJitter = Math.floor(Math.random() * 2500);
-        const totalReadingDelay = Math.min(22000, baseReadingTime + perCharReading + readingJitter);
+        // Gerçekçi okuma süresi (2 - 5 sn)
+        const baseReadingTime = 2500;
+        const perCharReading = userCharCount * 30;
+        const totalReadingDelay = Math.min(6000, baseReadingTime + perCharReading);
 
         const apiPromise = fetchWithRetry(API_URL, {
           method: 'POST',
@@ -461,10 +557,10 @@ DİYALOG KISITLAMALARI:
           try {
             parsedResponse = JSON.parse(jsonMatch[0]);
           } catch (e) {
-            parsedResponse = { mesajlar: [rawText] };
+            parsedResponse = { mesajlar: [rawText], tavsiye_mi: true };
           }
         } else {
-          parsedResponse = { mesajlar: [rawText] };
+          parsedResponse = { mesajlar: [rawText], tavsiye_mi: true };
         }
 
         const historyText = Array.isArray(parsedResponse.mesajlar) ? parsedResponse.mesajlar.join(" ") : rawText;
@@ -472,10 +568,11 @@ DİYALOG KISITLAMALARI:
 
         const firstMsg = Array.isArray(parsedResponse.mesajlar) ? parsedResponse.mesajlar[0] : rawText;
         const firstMsgCharCount = firstMsg.length;
+        // Canlı sitedeki gibi doğal yazım gecikmesi (4 - 10 sn)
         const baseTypingPrep = 2500;
-        const perCharTyping = firstMsgCharCount * 110;
-        const typingJitter = Math.floor(Math.random() * 2000);
-        const totalTypingDelay = Math.min(38000, baseTypingPrep + perCharTyping + typingJitter);
+        const perCharTyping = firstMsgCharCount * 65;
+        const typingJitter = Math.floor(Math.random() * 1500);
+        const totalTypingDelay = Math.min(11000, baseTypingPrep + perCharTyping + typingJitter);
 
         showTypingIndicator();
         await new Promise(resolve => setTimeout(resolve, totalTypingDelay));
@@ -484,10 +581,10 @@ DİYALOG KISITLAMALARI:
         if (Array.isArray(parsedResponse.mesajlar)) {
           for (let i = 0; i < parsedResponse.mesajlar.length; i++) {
             if (i > 0) {
-              await new Promise(resolve => setTimeout(resolve, 1800));
+              await new Promise(resolve => setTimeout(resolve, 1000));
               showTypingIndicator();
               const subLength = parsedResponse.mesajlar[i].length;
-              const subTypingDelay = Math.max(3500, Math.min(18000, 2000 + (subLength * 105)));
+              const subTypingDelay = Math.min(6000, 1500 + (subLength * 40));
               await new Promise(resolve => setTimeout(resolve, subTypingDelay));
               removeTypingIndicator();
             }
@@ -497,13 +594,44 @@ DİYALOG KISITLAMALARI:
           appendMessage(rawText, 'ai');
         }
 
+        // --- TAVSİYE SAYACI VE AŞAMA KONTROLÜ ---
+        let isAdvice = false;
+        if (parsedResponse && typeof parsedResponse.tavsiye_mi === 'boolean') {
+          isAdvice = parsedResponse.tavsiye_mi;
+        } else {
+          // Akıllı yedek (fallback)
+          const lower = historyText.toLowerCase();
+          const isClarification = lower.includes("ikilemi aktar") || lower.includes("senaryo üzerindesiniz") || lower.includes("durumu biraz açıklar");
+          isAdvice = !isClarification;
+        }
+
+        if (isAdvice) {
+          tavsiyeSayisi++;
+          if (tavsiyeSayisi === 1) {
+            userInput.placeholder = "Görüşünüzü belirtebilir veya itirazınızı yazabilirsiniz (Son tur)…";
+          }
+        }
+
+        // Hedeflenen tavsiye sayısına ulaşıldığında kilitlen ve bildirim kartı çıkar
+        if (tavsiyeSayisi >= HEDEF_TAVSIYE_SAYISI) {
+          userInput.disabled = true;
+          sendBtn.disabled = true;
+          userInput.placeholder = "Görüşme tamamlanmıştır. Lütfen anket sekmesine dönünüz.";
+          headerText.textContent = "Laboratuvar Asistanı (Görüşme Tamamlandı)";
+
+          await new Promise(resolve => setTimeout(resolve, 800));
+          showCompletionCard();
+        }
+
       } catch (error) {
         removeTypingIndicator();
         appendMessage("bağlantıda bir aksaklık oluştu, mesajınızı tekrar iletebilir misiniz", 'ai');
         console.error("API Hatası:", error);
       } finally {
-        sendBtn.disabled = false;
-        userInput.focus();
+        if (tavsiyeSayisi < HEDEF_TAVSIYE_SAYISI) {
+          sendBtn.disabled = false;
+          userInput.focus();
+        }
       }
     }
 
