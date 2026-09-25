@@ -506,8 +506,11 @@ YASAK KELİMELER: "adaletsiz, seçenek, şeffaf, ayrımcılık" kelimelerini asl
       card.innerHTML = `
         <div class="completion-badge">OTURUM TAMAMLANDI</div>
         <h3>Tartışma Aşaması Başarıyla Tamamlandı</h3>
-        <p>Bu aşama için araştırma asistanı ile gerekli fikir alışverişi tamamlanmıştır. Lütfen <strong>önceki tarayıcı sekmesindeki anket sayfasına geri dönün</strong> ve <strong>"Tartışmayı Tamamladım"</strong> butonuna tıklayarak araştırmaya devam edin.</p>
-        <p style="font-size: 12px; margin-bottom: 0; color: #9999a8;">Artık bu sekmeyi güvenle kapatabilirsiniz.</p>
+        <p>Bu aşama için araştırma asistanı ile gerekli fikir alışverişi tamamlanmıştır. Sağ üstteki <strong>"Sohbeti Kapat"</strong> butonuna veya aşağıdaki butona tıklayarak anketinize kaldığınız yerden devam edebilirsiniz.</p>
+        <button onclick="if(window.parent && window.parent !== window){ window.parent.postMessage({type: 'CLOSE_MODAL'}, '*'); } else { window.close(); }" style="margin-top: 14px; background: #6366f1; color: #ffffff; border: none; border-radius: 8px; padding: 11px 20px; font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: background 0.15s ease;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <span>Sohbeti Kapat ve Ankete Dön</span>
+        </button>
       `;
       chatLog.appendChild(card);
       chatLog.scrollTop = chatLog.scrollHeight;
@@ -632,8 +635,21 @@ YASAK KELİMELER: "adaletsiz, seçenek, şeffaf, ayrımcılık" kelimelerini asl
         if (tavsiyeSayisi >= HEDEF_TAVSIYE_SAYISI) {
           userInput.disabled = true;
           sendBtn.disabled = true;
-          userInput.placeholder = "Görüşme tamamlanmıştır. Lütfen anket sekmesine dönünüz.";
-          headerText.textContent = "Laboratuvar Asistanı (Görüşme Tamamlandı)";
+          userInput.placeholder = "Görüşme tamamlanmıştır. Lütfen pencereyi kapatıp ankete devam ediniz.";
+          headerText.textContent = "Görüşme Tamamlandı";
+
+          // Üst pencereye (anket sayfasına) konuşma dökümünü ve tamamlandı sinyalini ilet
+          try {
+            if (window.parent) {
+              window.parent.postMessage({
+                type: 'CHAT_COMPLETED',
+                dilemma: dilemmaParam,
+                history: conversationHistory
+              }, '*');
+            }
+          } catch (e) {
+            console.warn('postMessage hatası:', e);
+          }
 
           await new Promise(resolve => setTimeout(resolve, 800));
           showCompletionCard();
