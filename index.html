@@ -333,7 +333,7 @@
   <div class="chat-wrapper">
     <!-- İkilem Hatırlatma Rozeti -->
     <div class="scenario-reminder-banner">
-      <span>💡 <strong>Hatırlatma:</strong> Az önce okuduğunuz senaryoyu kısaca aktarıp, araştırma asistanının bu durumda ne yapacağını ve ne düşündüğünü sorabilirsiniz. Görüşme, asistandan <strong>2 tavsiye/değerlendirme aldıktan sonra</strong> otomatik olarak tamamlanıp kilitlenecektir.</span>
+      <span>💡 <strong>Hatırlatma:</strong> Senaryoyu baştan anlatmanıza gerek yoktur; bu senaryodaki kararınızı ve gerekçenizi kısaca yazabilir ya da araştırma asistanının ne düşündüğünü sorabilirsiniz. Görüşme, asistandan <strong>2 tavsiye/değerlendirme aldıktan sonra</strong> otomatik olarak tamamlanıp kilitlenecektir.</span>
     </div>
 
     <div id="chat-log">
@@ -376,9 +376,9 @@
 [KELİME_SINIRI: 25-45 kelime].
 
 AŞAMALAR VE TAVSİYE KURALLARI (ÇOK ÖNEMLİ):
-1. AŞAMA 1 (YALNIZCA Senaryo Hiç Yoksa / Epistemik Netleştirme):
-Katılımcının mesajında okul, yemek, öğrenci, israf, şirket, hediye kartı, çalışan gibi senaryoya dair HİÇBİR İPUCU VEYA KONU YOKSA (yani kullanıcı sadece "merhaba", "selam", "ne yapmalıyım", "başlayalım mı" gibi tamamen bağlamsız genel ifadeler yazdıysa); durumu önceden biliyormuş gibi yapmayın, nazikçe anket sayfasında az önce okuduğu ikilemi kısaca aktarmasını rica edin. Bu aşamada asla ahlaki yargı/tavsiye vermeyin; JSON çıktısında "tavsiye_mi": false olarak işaretleyin.
-DİKKAT: Kullanıcı mesajında senaryodan en ufak bir şekilde bahsettiği anda (kendi kararını veya gerekçesini belirtmemiş, sadece "sen olsan ne yapardın" diye sormuş olsa dahi) senaryo anlaşılmıştır; ASLA tekrar senaryoyu sormayın, DERHAL AŞAMA 2'ye geçin!
+1. AŞAMA 1 (YALNIZCA Katılımcı Sadece Selam Verip Hiçbir Görüş/Soru Belirtmediyse):
+Katılımcı sadece "merhaba", "selam", "başlayalım" gibi hiçbir görüş veya soru içermeyen tek kelimelik bir ifade yazdıysa; nazikçe senaryodaki kararını veya aklına takılanları paylaşmasını rica edin ("merhaba, senaryodaki kararınızı veya ne yapılması gerektiği konusundaki görüşünüzü dinliyorum"). Bu aşamada asla ahlaki yargı/tavsiye vermeyin; JSON çıktısında "tavsiye_mi": false olarak işaretleyin.
+DİKKAT: Katılımcı senaryoyu baştan anlatmak zorunda değildir. Kendi kararından bahsettiği, bir gerekçe sunduğu veya "sen ne düşünüyorsun / sence ne yapılmalı" diye sorduğu AN senaryo anlaşılmıştır; DERHAL AŞAMA 2'ye geçin!
 
 2. AŞAMA 2 (İlk Ahlaki Tavsiye / Katılımcı Senaryoyu Aktardığı An):
 🔴 MUTLAK KURAL: SENİN DURUŞUN SABİTTİR VE DAİMA 'MUTLAK EŞİTLİK'TİR!
@@ -448,7 +448,17 @@ DİYALOG KISITLAMALARI:
       notif.innerHTML = '<span>●</span> Nöbetçi Laboratuvar Asistanı oturuma bağlandı.';
       chatLog.appendChild(notif);
 
-      const welcomeMsg = "merhaba, beklettiğim için kusura bakmayın lütfen, bağlantı kuruldu. az önce anket sayfasında okuduğunuz ikilemi ve bu durumdaki kararınızı kısaca aktarabilirsiniz, dinliyorum";
+      const urlParams = new URLSearchParams(window.location.search);
+      const dilemmaParam = urlParams.get('d');
+
+      let welcomeMsg;
+      if (dilemmaParam === '1') {
+        welcomeMsg = "merhaba, beklettiğim için kusura bakmayın lütfen, bağlantı kuruldu. okulda yemek dağıtımı senaryosundaki kararınızı ve düşüncelerinizi kısaca paylaşabilirsiniz, dinliyorum";
+      } else if (dilemmaParam === '2') {
+        welcomeMsg = "merhaba, beklettiğim için kusura bakmayın lütfen, bağlantı kuruldu. şirkette hediye kartı senaryosundaki kararınızı ve düşüncelerinizi kısaca paylaşabilirsiniz, dinliyorum";
+      } else {
+        welcomeMsg = "merhaba, beklettiğim için kusura bakmayın lütfen, bağlantı kuruldu. okuduğunuz senaryodaki kararınızı ve düşüncelerinizi kısaca paylaşabilirsiniz, dinliyorum";
+      }
 
       // İlk mesajda da gerçekçi klavye yazım gecikmesi (karakter başına ~85ms)
       const baseTypingPrep = 2000;
