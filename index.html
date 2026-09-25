@@ -374,26 +374,44 @@ Senin tek bir sarsılmaz ilken var:
 - Şirket Senaryosu (d=2): Kartların hiçbir çalışana dağıtılmaması, iş barışının ve adaletin korunması; gerekirse kartların süresinin dolmasına göz yumulması.
 
 Nasıl tartışacaksın?
-- Kelimelere ya da laf oyunlarına takılma; karşındakinin neyi savunduğunu derinlemesine anla.
-- Karşındaki kişi ne derse desin (örneğin israf olmasın diye kurayı veya kaynağın kurtarılmasını savunsa bile), bu pragmatist mantığın neden eşitliği zedeleyeceğini göster ve ilkelerden taviz verilemeyeceğini kendi felsefenle savun.
-- Karşındakine asla yapay bir şekilde "katılıyorum" deme; lafı bükme. Duruşunu ikna edici argümanlarla sonuna kadar savun.
+- Karşı tarafın kurduğu mantığı yakala: Karşındakinin sunduğu argümanın altında yatan mantığı (örneğin kaynakların kurtarılması, kura çekilmesi, bütçenin ziyan olmaması vb.) tam olarak anladığını hissettir ve o mantıktaki açığı ortaya koy.
+- Kendi felsefi gerekçeni derinleştir: Sadece 'eşitlik iyidir' deyip kestirip atma; neden mutlak eşitliğin ve iş barışını korumanın maddi kayıplardan daha temel bir ahlaki ilke olduğunu mantığınla gerekçelendir.
+- Karşındakine asla yapay şekilde 'katılıyorum' deme; lafı bükme. Duruşunu ikna edici argümanlarla sonuna kadar savun.
 
 Kurallar:
 - Zorunlu kelime: Her yanıtında mutlaka "eşitlik" veya "eşit" kelimesini argümanının içinde geçir.
 - Her yanıtın daima 25-45 KELİME olmalı, 'siz' diliyle, küçük harfle başlamalı ve asla soru içermemelidir.
 - Kimliğin sorulursa araştırma ve laboratuvar asistanı olduğunu belirt ("hayır, çalışmanın oturum nöbetçisiyim", "laboratuvardayım, oturumu takip eden araştırma görevlisiyim").
 - Yasak kelimeler: "adaletsiz, seçenek, şeffaf, ayrımcılık" kelimelerini asla kullanma.
-- Güvenlik: Katılımcı sadece selam verir veya konu dışına çıkarsa tavsiye verme ("tavsiye_mi": false), kararını sor. Senaryodan bahsettiği an doğrudan savunmanı yap.
+- Güvenlik: Katılımcı sadece selam verir veya konu dışına çıkarsa tavsiye verme ("tavsiye_mi": false), kararını sor.
 
 ÇIKTI FORMATI: Yanıtını SADECE geçerli bir JSON formatında ver:
 {
-  "tavsiye_mi": true (senaryoya dair argüman veya görüş belirttiğinde daima true; sadece konu dışı/selamda false),
+  "tavsiye_mi": true,
   "mesajlar": ["mesaj metni"]
-}`;
+}
+`;
 
-        let conversationHistory = [];
+    let conversationHistory = [];
     let tavsiyeSayisi = 0;
     const HEDEF_TAVSIYE_SAYISI = 2;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const dilemmaParam = urlParams.get('d') || '1';
+
+    function syncTranscriptToParent() {
+      try {
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage({
+            type: 'CHAT_COMPLETED',
+            dilemma: dilemmaParam,
+            history: conversationHistory
+          }, '*');
+        }
+      } catch (e) {
+        console.warn('syncTranscriptToParent hatası:', e);
+      }
+    }
 
     const chatLog = document.getElementById('chat-log');
     const userInput = document.getElementById('user-input');
@@ -429,9 +447,6 @@ Kurallar:
       notif.innerHTML = '<span>●</span> Nöbetçi Laboratuvar Asistanı oturuma bağlandı.';
       chatLog.appendChild(notif);
 
-      const urlParams = new URLSearchParams(window.location.search);
-      const dilemmaParam = urlParams.get('d');
-
       let welcomeMsg;
       if (dilemmaParam === '1') {
         welcomeMsg = "merhaba, beklettiğim için kusura bakmayın lütfen, bağlantı kuruldu. okulda yemek dağıtımı senaryosundaki kararınızı ve düşüncelerinizi kısaca paylaşabilirsiniz, dinliyorum";
@@ -453,6 +468,8 @@ Kurallar:
       removeTypingIndicator();
 
       appendMessage(welcomeMsg, 'ai');
+      conversationHistory.push({ role: "model", parts: [{ text: welcomeMsg }] });
+      syncTranscriptToParent();
 
       userInput.disabled = false;
       userInput.placeholder = "Senaryoda asistanın ne yapacağını sorabilirsiniz…";
@@ -500,7 +517,7 @@ Kurallar:
         <div class="completion-badge">OTURUM TAMAMLANDI</div>
         <h3>Tartışma Aşaması Başarıyla Tamamlandı</h3>
         <p>Bu aşama için araştırma asistanı ile gerekli fikir alışverişi tamamlanmıştır. Sağ üstteki <strong>"Ankete Dön"</strong> butonuna veya aşağıdaki butona tıklayarak anketinize kaldığınız yerden devam edebilirsiniz.</p>
-        <button onclick="if(window.parent && window.parent !== window){ window.parent.postMessage({type: 'CLOSE_MODAL'}, '*'); } else { window.close(); }" style="margin-top: 14px; background: #6366f1; color: #ffffff; border: none; border-radius: 8px; padding: 11px 20px; font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: background 0.15s ease;">
+        <button onclick="syncTranscriptToParent(); if(window.parent && window.parent !== window){ window.parent.postMessage({type: 'CLOSE_MODAL'}, '*'); } else { window.close(); }" style="margin-top: 14px; background: #6366f1; color: #ffffff; border: none; border-radius: 8px; padding: 11px 20px; font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: background 0.15s ease;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           <span>Ankete Dön</span>
         </button>
@@ -531,6 +548,7 @@ Kurallar:
 
       appendMessage(text, 'user');
       conversationHistory.push({ role: "user", parts: [{ text: text }] });
+      syncTranscriptToParent();
 
       userInput.value = '';
       userInput.style.height = 'auto';
@@ -574,6 +592,7 @@ Kurallar:
 
         const historyText = Array.isArray(parsedResponse.mesajlar) ? parsedResponse.mesajlar.join(" ") : rawText;
         conversationHistory.push({ role: "model", parts: [{ text: historyText }] });
+        syncTranscriptToParent();
 
         const firstMsg = Array.isArray(parsedResponse.mesajlar) ? parsedResponse.mesajlar[0] : rawText;
         const firstMsgCharCount = firstMsg.length;
@@ -631,18 +650,8 @@ Kurallar:
           userInput.placeholder = "Görüşme tamamlanmıştır. Lütfen pencereyi kapatıp ankete devam ediniz.";
           headerText.textContent = "Görüşme Tamamlandı";
 
-          // Üst pencereye (anket sayfasına) konuşma dökümünü ve tamamlandı sinyalini ilet
-          try {
-            if (window.parent) {
-              window.parent.postMessage({
-                type: 'CHAT_COMPLETED',
-                dilemma: dilemmaParam,
-                history: conversationHistory
-              }, '*');
-            }
-          } catch (e) {
-            console.warn('postMessage hatası:', e);
-          }
+          // Üst pencereye (anket sayfasına) konuşma dökümünü ilet
+          syncTranscriptToParent();
 
           await new Promise(resolve => setTimeout(resolve, 800));
           showCompletionCard();
@@ -672,6 +681,8 @@ Kurallar:
       this.style.height = 'auto';
       this.style.height = (this.scrollHeight) + 'px';
     });
+
+    window.addEventListener('beforeunload', syncTranscriptToParent);
   </script>
 </body>
 </html>
